@@ -1,0 +1,45 @@
+---
+- name: Practice with ansible Playbook - macOS Setup for Flask App
+  hosts: localhost
+  connection: local
+  become: false  # No sudo needed for most local Mac tasks
+
+  tasks:
+    # Task 1: Make sure Flask is installed using pip3
+    - name: Ensure Flask is installed (via pip3)
+      pip:
+        name: flask              # Package name
+        executable: pip3         # Ensures pip3 is used, not pip for Python 2
+
+    # Task 2: Install Supervisor using Homebrew
+    - name: Ensure Supervisor is installed with Homebrew
+      homebrew:
+        name: supervisor         # Supervisor is used to auto-restart Flask app
+        state: present           # Ensures it’s installed
+
+    # Task 3: Create a directory for Supervisor config if it doesn’t exist
+    - name: Create Supervisor config directory (if it doesn't exist)
+      file:
+        path: "{{ lookup('env','HOME') }}/supervisor-test"  
+        state: directory
+
+    # Task 4: Write a basic supervisord.conf to manage flask_app
+    - name: Create supervisord.conf file for flask_app
+      copy:
+        dest: "{{ lookup('env','HOME') }}/supervisor-test/supervisord.conf"
+        content: |
+          [supervisord]
+          logfile=/tmp/supervisord.log               ; Where logs go
+          pidfile=/tmp/supervisord.pid               ; PID tracking
+          childlogdir=/tmp/                          ; Log directory for sub-processes
+          serverurl=unix:///tmp/supervisor.sock      ; Control socket
+
+          [program:flask_app]
+          command=python3 {{ lookup('env','HOME') }}/Desktop/SAAVFOXDEV/sreTest/app.py
+          autostart=true                             ; Start on launch
+          autorestart=true                           ; Restart on crash
+          stderr_logfile=/tmp/flask_err.log
+          stdout_logfile=/tmp/flask_out.log
+
+          [supervisorctl]
+          serverurl=unix:///tmp/supervisor.sock      ; Matches the main socket
