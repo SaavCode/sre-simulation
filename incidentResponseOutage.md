@@ -1,4 +1,3 @@
-```markdown
 # 🧾 Incident Report: Flask App Outage
 
 **Service:** Local Flask App  
@@ -25,11 +24,11 @@ The Flask-based application (`flask_app`) serving Prometheus metrics on port `50
 
 - **Prometheus Metric:** `up{job="flask_app"} = 0`
 - **Grafana Alert Rule:**
-```
 
-WHEN up{job="flask\_app"} IS BELOW 1
+  ```
+  WHEN up{job="flask_app"} IS BELOW 1
+  ```
 
-```
 - **Evaluation frequency:** 15s  
 - **Alert Status:** Firing → Resolved
 
@@ -54,13 +53,12 @@ The application was manually terminated to simulate a failure. No bugs or miscon
 
 - No manual intervention required.
 - `supervisord` logged restart attempts and successful recovery:
-```
 
-INFO spawned: 'flask\_app'
-WARN exited: flask\_app (exit status 1)
-INFO success: flask\_app entered RUNNING state
-
-```
+  ```
+  INFO spawned: 'flask_app'
+  WARN exited: flask_app (exit status 1)
+  INFO success: flask_app entered RUNNING state
+  ```
 
 ---
 
@@ -77,4 +75,3 @@ INFO success: flask\_app entered RUNNING state
 - Add log forwarding or persistent storage for service logs.
 - Consider using `systemd`, Docker healthchecks, or Kubernetes probes for production-level process management.
 - Extend alerting to include request duration and exception counts.
-```
