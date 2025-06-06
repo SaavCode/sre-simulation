@@ -1,0 +1,18 @@
+# API version for Grafana provisioning.
+apiVersion: 1
+
+# List of dashboard providers.
+providers:
+  - name: 'default'
+    # Organization ID to which the dashboards will be provisioned.
+    orgId: 1
+    # Folder in Grafana where dashboards will be placed. Empty means root.
+    folder: ''
+    # Type of the dashboard provider. 'file' means dashboards are loaded from files.
+    type: file
+    # Options specific to the 'file' type provider.
+    options:
+      # Path to the directory containing dashboard JSON files.
+      path: /etc/grafana/provisioning/dashboards
+      # If true, Grafana will create folders based on the directory structure in the path.
+      foldersFromFilesStructure: false

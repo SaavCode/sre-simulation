@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Server Monitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav>
+    <div class="title">Server Monitor</div>
+    <div class="dropdown">
+      <button class="dropbtn">Menu</button>
+      <div class="dropdown-content">
+        <a href="http://localhost:9090">Open Prometheus</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="metrics">
+      <div class="metric-box">
+        <div class="metric-label">CPU Load</div>
+        <div class="metric-value" id="cpu">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Free RAM</div>
+        <div class="metric-value" id="ram">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Disk Usage</div>
+        <div class="metric-value" id="disk">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Uptime</div>
+        <div class="metric-value" id="uptime">--</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper to fetch any Prometheus metric and format the result
+    async function fetchMetric(query, formatter) {
+      try {
+        const res = await fetch(`http://localhost:9090/api/v1/query?query=${encodeURIComponent(query)}`);
+        const json = await res.json();
+        if (json.data.result.length > 0) {
+          return formatter(json.data.result[0].value[1]);
+        }
+        return 'n/a';
+      } catch (err) {
+        console.error("Metric fetch failed:", err);
+        return 'error';
+      }
+    }
+
+    // CPU Load (1 minute average)
+    fetchMetric('node_load1', val => Number(val).toFixed(2))
+      .then(result => document.getElementById('cpu').textContent = result);
+
+    // Free RAM = total - free (in GB, rough estimate but works fine)
+    const usedRamQuery = 'node_memory_total_bytes - node_memory_free_bytes';
+    fetchMetric(usedRamQuery, val => (Number(val) / 1e9).toFixed(2) + ' GB')
+     .then(result => document.getElementById('ram').textContent = result);
+
+
+    // Disk Usage = size - free, for root partition (in GB)
+    const diskQuery = '(node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_free_bytes{mountpoint="/"})';
+    fetchMetric(diskQuery, val => (Number(val) / 1e9).toFixed(2) + ' GB')
+      .then(result => document.getElementById('disk').textContent = result);
+
+    // Uptime = now - boot_time (in days/hours/mins)
+    fetchMetric('time() - node_boot_time_seconds', val => {
+      const seconds = parseInt(val);
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      return `${days}d ${hours}h ${mins}m`;
+    }).then(result => document.getElementById('uptime').textContent = result);
+  </script>
+  <!-- only show Prometheus link if we're on localhost -->
+<script>
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    const menu = document.querySelector('.dropdown-content');
+    const link = document.createElement('a');
+    link.href = 'http://localhost:9090';
+    link.textContent = 'Open Prometheus';
+    menu.appendChild(link);
+  }
+</script>
+
+</body>
+</html>

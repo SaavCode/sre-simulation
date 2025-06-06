@@ -1,0 +1,40 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "title": "Basic VPS Monitoring",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Load (1m)",
+      "targets": [
+        {
+          "expr": "node_load1",
+          "legendFormat": "load1",
+          "refId": "A"
+        }
+      ],
+      "id": 1
+    },
+    {
+      "type": "graph",
+      "title": "Memory Available",
+      "targets": [
+        {
+          "expr": "node_memory_MemAvailable_bytes / 1024 / 1024 / 1024",
+          "legendFormat": "Free GB",
+          "refId": "B"
+        }
+      ],
+      "id": 2
+    }
+  ],
+  "schemaVersion": 30,
+  "version": 1
+}

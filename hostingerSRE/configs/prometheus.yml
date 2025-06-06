@@ -1,0 +1,13 @@
+# Global Prometheus configuration.
+global:
+  # How frequently to scrape targets by default.
+  scrape_interval: 15s
+  # How frequently to evaluate rules.
+  evaluation_interval: 15s
+
+# A list of scrape configurations.
+scrape_configs:
+  - job_name: 'node_exporter'
+    # static_configs allows specifying a list of targets to scrape.
+    static_configs:
+      - targets: ['localhost:9100']
